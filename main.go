@@ -21,16 +21,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-	for range c {
+
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-sigs
 		fmt.Println("Cleaning up lock file...")
 		err = os.Remove(tmpFileName)
 		if err != nil {
 			log.Fatal(err)
 		}
-		os.Exit(0)
-	}
+		done <- true
+	}()
+
+	fmt.Println("Awaiting signal")
+	<-done
+	fmt.Println("Exit")
 }
 
 func fileExists() bool {

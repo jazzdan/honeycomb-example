@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,16 +16,15 @@ func main() {
 		log.Fatal("Lock file exists")
 	}
 
+	fmt.Println("Writing lock file")
 	err := ioutil.WriteFile(tmpFileName, nil, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	c := make(chan os.Signal, 1)
-	// This reproduces the problem
-	signal.Notify(c, syscall.SIGINT)
-	// This doesn't
-	//signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	for range c {
+		fmt.Println("Cleaning up lock file...")
 		err = os.Remove(tmpFileName)
 		if err != nil {
 			log.Fatal(err)

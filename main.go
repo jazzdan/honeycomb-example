@@ -20,7 +20,10 @@ func main() {
 		log.Fatal(err)
 	}
 	c := make(chan os.Signal, 1)
+	// This reproduces the problem
 	signal.Notify(c, syscall.SIGINT)
+	// This doesn't
+	//signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	for range c {
 		err = os.Remove(tmpFileName)
 		if err != nil {

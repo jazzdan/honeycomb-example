@@ -20,7 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, syscall.SIGINT)
 	for range c {
 		err = os.Remove(tmpFileName)
 		if err != nil {
